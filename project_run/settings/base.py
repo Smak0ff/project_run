@@ -114,3 +114,8 @@ STATIC_ROOT = 'static'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#APP_PARAMS
+COMPANY_NAME = 'Нога и копыто'
+SLOGAN = 'Бегаем в любую погоду! От -30 до +30!'
+CONTACTS = 'г.Ростов-на-Дону'
