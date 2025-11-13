@@ -7,3 +7,7 @@ class Run(models.Model):
     athlete = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField()
 
+    def __str__(self):
+        return f'{self.athlete}: {self.comment}'
+
+
