@@ -62,3 +62,7 @@ class RunStartEndView(APIView):
                 return Response({'detail': f'Статус объекта {run_id} - {run.status}. Обновление статуса не выполнено.'},
                                 status=status.HTTP_400_BAD_REQUEST)
 
+    def post(self, request, run_id):
+        return self.patch(request, run_id)
+
+
