@@ -52,7 +52,7 @@ class RunStartView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-class RunEndView(APIView):
+class RunStopView(APIView):
     def patch(self, request, run_id):
         run = get_object_or_404(Run, id=run_id)
         if run.status == Run.Status.IN_PROGRESS:
