@@ -40,29 +40,25 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         return qs
 
 
-class RunStartEndView(APIView):
-    action = None
+class RunStartView(APIView):
+    def post(self, request, run_id):
+        run = get_object_or_404(Run, id=run_id)
+        if run.status == Run.Status.INIT:
+            run.status = Run.Status.IN_PROGRESS
+            run.save()
+            return Response({'detail': f'Статус объекта {run_id} обновлен на {Run.Status.IN_PROGRESS}.'})
+        else:
+            return Response({'detail': f'Статус объекта {run_id} - {run.status}. Обновление статуса не выполнено.'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
+
+class RunEndView(APIView):
     def patch(self, request, run_id):
         run = get_object_or_404(Run, id=run_id)
-        if self.action == 'start':
-            if run.status == Run.Status.INIT:
-                run.status = Run.Status.IN_PROGRESS
-                run.save()
-                return Response({'detail': f'Статус объекта {run_id} обновлен на {Run.Status.IN_PROGRESS}.'})
-            else:
-                return Response({'detail': f'Статус объекта {run_id} - {run.status}. Обновление статуса не выполнено.'},
-                                status=status.HTTP_400_BAD_REQUEST)
-        elif self.action == 'end':
-            if run.status == Run.Status.IN_PROGRESS:
-                run.status = Run.Status.FINISHED
-                run.save()
-                return Response({'detail': f'Статус объекта {run_id} обновлен на {Run.Status.FINISHED}.'})
-            else:
-                return Response({'detail': f'Статус объекта {run_id} - {run.status}. Обновление статуса не выполнено.'},
-                                status=status.HTTP_400_BAD_REQUEST)
-
-    def post(self, request, run_id):
-        return self.patch(request, run_id)
-
-
+        if run.status == Run.Status.IN_PROGRESS:
+            run.status = Run.Status.FINISHED
+            run.save()
+            return Response({'detail': f'Статус объекта {run_id} обновлен на {Run.Status.FINISHED}.'})
+        else:
+            return Response({'detail': f'Статус объекта {run_id} - {run.status}. Обновление статуса не выполнено.'},
+                            status=status.HTTP_400_BAD_REQUEST)
