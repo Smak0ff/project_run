@@ -1,8 +1,9 @@
-from django.shortcuts import render
-from rest_framework import viewsets
+from django.shortcuts import render, get_object_or_404
+from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
+from rest_framework.views import APIView
 from django.conf import settings
 from .serializers import RunSerializer, UserSerializer
 from .models import Run
@@ -37,3 +38,33 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         elif user_type == 'athlete':
             qs = qs.filter(is_staff=False)
         return qs
+
+
+class RunStartView(APIView):
+    queryset = Run.objects.all().select_related('athlete')
+    serializer_class = RunSerializer
+
+    def patch(self, request, run_id):
+        run = get_object_or_404(Run, id=run_id)
+        if run.status == Run.Status.INIT:
+            run.status = Run.Status.IN_PROGRESS
+            run.save()
+            return Response({f'Статус объекта {run_id} обновлен на IN_PROGRESS.'})
+        else:
+            return Response({f'Статус объекта {run_id} - {run.status}. Обновление статуса не выполнено.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+class RunEndView(APIView):
+    queryset = Run.objects.all().select_related('athlete')
+    serializer_class = RunSerializer
+
+    def patch(self, request, run_id):
+        run = get_object_or_404(Run, id=run_id)
+        if run.status == Run.Status.IN_PROGRESS:
+            run.status = Run.Status.FINISHED
+            run.save()
+            return Response({f'Статус объекта {run_id} обновлен на FINISHED.'})
+        else:
+            return Response({f'Статус объекта {run_id} - {run.status}. Обновление статуса не выполнено.'},
+                            status=status.HTTP_400_BAD_REQUEST)
