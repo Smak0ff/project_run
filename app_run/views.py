@@ -2,12 +2,14 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.views import APIView
 from django.conf import settings
 from .serializers import RunSerializer, UserSerializer
 from .models import Run
 from django.contrib.auth.models import User
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.pagination import PageNumberPagination
 
 
 @api_view(['GET'])
@@ -19,16 +21,30 @@ def company_details_view(request):
     })
 
 
+class Pagination(PageNumberPagination):
+    # page_size = 3  # Количество объектов на странице по умолчанию (не обязательный параметр)
+    page_size_query_param = 'size'  # Разрешаем изменять количество объектов через query параметр size в url
+    max_page_size = 50  # Ограничиваем максимальное количество объектов на странице
+
+
 class RunViewSet(viewsets.ModelViewSet):
     queryset = Run.objects.all().select_related('athlete')
     serializer_class = RunSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['status', 'athlete']
+    ordering_fields = ['created_at']
+    ordering = ['id']
+    pagination_class = Pagination
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all().filter(is_superuser=False)
     serializer_class = UserSerializer
-    filter_backends = [SearchFilter]
+    filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['first_name', 'last_name']
+    ordering_fields = ['date_joined']
+    ordering = ['id']
+    pagination_class = Pagination
 
     def get_queryset(self):
         qs = self.queryset
