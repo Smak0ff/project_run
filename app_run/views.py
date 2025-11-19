@@ -94,12 +94,12 @@ class AthleteInfoView(APIView):
 
     def put(self, request, user_id):
         user = get_object_or_404(User, id=user_id)
-        user_weight = request.query_params.get('weight', 0)
-        if not user_weight.isdigit() or int(user_weight) not in range(1, 901):
+        user_weight = request.data.get('weight', 0)
+        if not isinstance(user_weight, int) or user_weight not in range(1, 901):
             return Response({'details': 'Вес должен быть от 1 до 900 кг'}, status=status.HTTP_400_BAD_REQUEST)
         athlete_info, created = AthleteInfo.objects.get_or_create(user_id=user, defaults={'user_id': user,
-                                                                            'goals': request.query_params.get('goals', ''),
-                                                                            'weight': request.query_params.get('weight', 0)})
+                                                                            'goals': request.data.get('goals', ''),
+                                                                            'weight': request.data.get('weight', 0)})
         if not created:
             athlete_info.goals = request.query_params.get('goals', '')
             athlete_info.weight = user_weight
