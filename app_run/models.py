@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Run(models.Model):
@@ -19,3 +20,10 @@ class Run(models.Model):
         return f'{self.athlete}: {self.comment}'
 
 
+class AthleteInfo(models.Model):
+    goals = models.TextField()
+    weight = models.IntegerField()
+    user_id = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.goals

@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.views import APIView
 from django.conf import settings
-from .serializers import RunSerializer, UserSerializer
-from .models import Run
+from .serializers import RunSerializer, UserSerializer, AthleteInfoSerializer
+from .models import Run, AthleteInfo
 from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
@@ -81,3 +81,28 @@ class RunStopView(APIView):
 
     def post(self, request, run_id):
         return self.patch(request, run_id)
+
+
+class AthleteInfoView(APIView):
+
+    def get(self, request, user_id):
+        user = get_object_or_404(User, id=user_id)
+        athlete_info, created = AthleteInfo.objects.get_or_create(user_id=user, defaults={'user_id': user, 'goals': '',
+                                                                                          'weight': 0})
+        serializer = AthleteInfoSerializer(athlete_info)
+        return Response(serializer.data)
+
+    def put(self, request, user_id):
+        user = get_object_or_404(User, id=user_id)
+        user_weight = request.query_params.get('weight', 0)
+        if not user_weight.isdigit() or int(user_weight) not in range(1, 901):
+            return Response({'details': 'Вес должен быть от 1 до 900 кг'}, status=status.HTTP_400_BAD_REQUEST)
+        athlete_info, created = AthleteInfo.objects.get_or_create(user_id=user, defaults={'user_id': user,
+                                                                            'goals': request.query_params.get('goals', ''),
+                                                                            'weight': request.query_params.get('weight', 0)})
+        if not created:
+            athlete_info.goals = request.query_params.get('goals', '')
+            athlete_info.weight = user_weight
+            athlete_info.save()
+        serializer = AthleteInfoSerializer(athlete_info)
+        return Response(serializer.data)
