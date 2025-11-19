@@ -105,4 +105,4 @@ class AthleteInfoView(APIView):
             athlete_info.weight = user_weight
             athlete_info.save()
         serializer = AthleteInfoSerializer(athlete_info)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
