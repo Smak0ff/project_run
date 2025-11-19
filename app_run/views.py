@@ -94,15 +94,10 @@ class AthleteInfoView(APIView):
 
     def put(self, request, user_id):
         user = get_object_or_404(User, id=user_id)
-        user_weight = request.data.get('weight', 0)
-        if not isinstance(user_weight, int) or user_weight not in range(1, 901):
-            return Response({'details': 'Вес должен быть больше 0 и меньше 900'}, status=status.HTTP_400_BAD_REQUEST)
         athlete_info, created = AthleteInfo.objects.get_or_create(user_id=user, defaults={'user_id': user,
                                                                             'goals': request.data.get('goals', ''),
                                                                             'weight': request.data.get('weight', 0)})
-        if not created:
-            athlete_info.goals = request.query_params.get('goals', '')
-            athlete_info.weight = user_weight
-            athlete_info.save()
-        serializer = AthleteInfoSerializer(athlete_info)
+        serializer = AthleteInfoSerializer(athlete_info, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)

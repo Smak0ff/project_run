@@ -33,6 +33,8 @@ class RunSerializer(serializers.ModelSerializer):
 
 
 class AthleteInfoSerializer(serializers.ModelSerializer):
+    weight = serializers.IntegerField(min_value=1, max_value=899)
+
     class Meta:
         model = AthleteInfo
         fields = '__all__'
