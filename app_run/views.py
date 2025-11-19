@@ -96,7 +96,7 @@ class AthleteInfoView(APIView):
         user = get_object_or_404(User, id=user_id)
         user_weight = request.data.get('weight', 0)
         if not isinstance(user_weight, int) or user_weight not in range(1, 901):
-            return Response({'details': 'Вес должен быть от 1 до 900 кг'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'details': 'Вес должен быть больше 0 и меньше 900'}, status=status.HTTP_400_BAD_REQUEST)
         athlete_info, created = AthleteInfo.objects.get_or_create(user_id=user, defaults={'user_id': user,
                                                                             'goals': request.data.get('goals', ''),
                                                                             'weight': request.data.get('weight', 0)})
