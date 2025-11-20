@@ -36,4 +36,4 @@ class AthleteInfo(models.Model):
 
 class Challenge(models.Model):
     full_name = models.CharField(max_length=300)
-    athlete = models.ManyToManyField(User, blank=True)
+    athlete = models.ForeignKey(User, on_delete=models.CASCADE)

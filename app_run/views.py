@@ -77,9 +77,8 @@ class RunStopView(APIView):
             runs_finished = run.athlete.athlete_info.get_runs_finished_count()
             if runs_finished >= 10:
                 challenge, _ = Challenge.objects.get_or_create(
-                    full_name='Сделай 10 Забегов!'
+                    full_name='Сделай 10 Забегов!', athlete=run.athlete
                 )
-                challenge.athlete.add(run.athlete)
             return Response({'detail': f'Статус объекта {run_id} обновлен на {Run.Status.FINISHED}.'})
         else:
             return Response({'detail': f'Статус объекта {run_id} - {run.status}. Обновление статуса не выполнено.'},
