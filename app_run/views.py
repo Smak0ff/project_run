@@ -75,7 +75,7 @@ class RunStopView(APIView):
             run.status = Run.Status.FINISHED
             run.save()
             runs_finished = run.athlete.athlete_info.get_runs_finished_count()
-            if runs_finished == 2:
+            if runs_finished == 10:
                 challenge, _ = Challenge.objects.get_or_create(
                     full_name='Сделай 10 Забегов!'
                 )
