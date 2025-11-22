@@ -49,7 +49,7 @@ class Challenge(models.Model):
 class Position(models.Model):
     run = models.ForeignKey(Run, on_delete=models.CASCADE)
     latitude = models.DecimalField(max_digits=7, decimal_places=4)
-    longtitude = models.DecimalField(max_digits=7, decimal_places=4)
+    longitude = models.DecimalField(max_digits=7, decimal_places=4)
 
     def __str__(self):
-        return f'{str(self.latitude)}:{str(self.longtitude)}'
+        return f'{str(self.latitude)}:{str(self.longitude)}'

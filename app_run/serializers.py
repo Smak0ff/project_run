@@ -54,7 +54,7 @@ class ChallengeSerializer(serializers.ModelSerializer):
 
 class PositionSerializer(serializers.ModelSerializer):
     latitude = serializers.DecimalField(min_value=-90, max_value=90, max_digits=7, decimal_places=4)
-    longtitude = serializers.DecimalField(min_value=-180, max_value=180, max_digits=7, decimal_places=4)
+    longitude = serializers.DecimalField(min_value=-180, max_value=180, max_digits=7, decimal_places=4)
     class Meta:
         model = Position
         fields = '__all__'
