@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Run, AthleteInfo, Challenge
+from .models import Run, AthleteInfo, Challenge, Position
 from django.contrib.auth.models import User
 
 
@@ -50,3 +50,17 @@ class ChallengeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Challenge
         fields = '__all__'
+
+
+class PositionSerializer(serializers.ModelSerializer):
+    latitude = serializers.DecimalField(min_value=-90, max_value=90, max_digits=7, decimal_places=4)
+    longtitude = serializers.DecimalField(min_value=-180, max_value=180, max_digits=7, decimal_places=4)
+    class Meta:
+        model = Position
+        fields = '__all__'
+
+    def validate_run(self, value):
+        if not Run.run_in_progress_status(value):
+            raise serializers.ValidationError('Только для запущенных забегов!')
+        return value
+

@@ -18,6 +18,13 @@ class Run(models.Model):
     def __str__(self):
         return f'{self.athlete}: {self.comment}'
 
+    @classmethod
+    def run_in_progress_status(cls, run_id):
+        run = Run.objects.filter(id=run_id.id).first()
+        if not run:
+            return False
+        return run.status == Run.Status.IN_PROGRESS
+
 
 class AthleteInfo(models.Model):
     goals = models.TextField()
@@ -37,3 +44,12 @@ class AthleteInfo(models.Model):
 class Challenge(models.Model):
     full_name = models.CharField(max_length=300)
     athlete = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+class Position(models.Model):
+    run = models.ForeignKey(Run, on_delete=models.CASCADE)
+    latitude = models.DecimalField(max_digits=7, decimal_places=4)
+    longtitude = models.DecimalField(max_digits=7, decimal_places=4)
+
+    def __str__(self):
+        return f'{str(self.latitude)}:{str(self.longtitude)}'
