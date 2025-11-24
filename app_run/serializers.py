@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Run, AthleteInfo, Challenge, Position
 from django.contrib.auth.models import User
+from . import utils
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -17,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_runs_finished(self, obj):
         athlete_info = getattr(obj, 'athlete_info', None)
-        return 0 if athlete_info is None else obj.athlete_info.get_runs_finished_count()
+        return 0 if athlete_info is None else utils.get_runs_finished_count(athlete_info.user)
 
 
 class UserSerializerSmall(serializers.ModelSerializer):

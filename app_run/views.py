@@ -10,6 +10,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from .serializers import RunSerializer, UserSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer
 from .models import Run, AthleteInfo, Challenge, Position
+from . import utils
 
 
 @api_view(['GET'])
@@ -74,7 +75,7 @@ class RunStopView(APIView):
         if run.status == Run.Status.IN_PROGRESS:
             run.status = Run.Status.FINISHED
             run.save()
-            runs_finished = run.athlete.athlete_info.get_runs_finished_count()
+            runs_finished = utils.get_runs_finished_count(run.athlete)
             if runs_finished >= 10:
                 challenge, _ = Challenge.objects.get_or_create(
                     full_name='Сделай 10 Забегов!', athlete=run.athlete
