@@ -33,6 +33,7 @@ class Run(models.Model):
             prev_position = pos
         return total_distance_km
 
+
     @classmethod
     def run_in_progress_status(cls, run_id):
         run = Run.objects.filter(id=run_id.id).first()

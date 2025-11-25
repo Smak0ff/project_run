@@ -10,7 +10,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from .serializers import RunSerializer, UserSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer
 from .models import Run, AthleteInfo, Challenge, Position
-from . import utils
+from . import utils, enum
 
 
 @api_view(['GET'])
@@ -63,6 +63,7 @@ class RunStartView(APIView):
         if run.status == Run.Status.INIT:
             run.status = Run.Status.IN_PROGRESS
             run.save()
+            utils.challenge_check(enum.ChallengeEvent.RUN_STARTED, run)
             return Response({'detail': f'Статус объекта {run_id} обновлен на {Run.Status.IN_PROGRESS}.'})
         else:
             return Response({'detail': f'Статус объекта {run_id} - {run.status}. Обновление статуса не выполнено.'},
@@ -76,11 +77,7 @@ class RunStopView(APIView):
             run.status = Run.Status.FINISHED
             run.distance = run.distance_calculation()
             run.save()
-            runs_finished = utils.get_runs_finished_count(run.athlete)
-            if runs_finished >= 10:
-                challenge, _ = Challenge.objects.get_or_create(
-                    full_name='Сделай 10 Забегов!', athlete=run.athlete
-                )
+            utils.challenge_check(enum.ChallengeEvent.RUN_FINISHED, run)
             return Response({'detail': f'Статус объекта {run_id} обновлен на {Run.Status.FINISHED}.',
                              'distance': run.distance})
         else:
