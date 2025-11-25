@@ -74,13 +74,15 @@ class RunStopView(APIView):
         run = get_object_or_404(Run, id=run_id)
         if run.status == Run.Status.IN_PROGRESS:
             run.status = Run.Status.FINISHED
+            run.distance = run.distance_calculation()
             run.save()
             runs_finished = utils.get_runs_finished_count(run.athlete)
             if runs_finished >= 10:
                 challenge, _ = Challenge.objects.get_or_create(
                     full_name='Сделай 10 Забегов!', athlete=run.athlete
                 )
-            return Response({'detail': f'Статус объекта {run_id} обновлен на {Run.Status.FINISHED}.'})
+            return Response({'detail': f'Статус объекта {run_id} обновлен на {Run.Status.FINISHED}.',
+                             'distance': run.distance})
         else:
             return Response({'detail': f'Статус объекта {run_id} - {run.status}. Обновление статуса не выполнено.'},
                             status=status.HTTP_400_BAD_REQUEST)

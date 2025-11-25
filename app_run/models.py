@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from geopy.distance import geodesic
 
 
 class Run(models.Model):
@@ -10,6 +11,7 @@ class Run(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     athlete = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField()
+    distance = models.FloatField(default=0.0)
     status = models.CharField(
         choices=Status.choices,
         default=Status.INIT
@@ -17,6 +19,19 @@ class Run(models.Model):
 
     def __str__(self):
         return f'{self.athlete}: {self.comment}'
+
+    def distance_calculation(self):
+        positions = Position.objects.filter(run=self).order_by('id')
+        total_distance_km = 0.0
+        prev_position = None
+        for pos in positions:
+            if prev_position is not None:
+                prev_position = (prev_position.latitude, prev_position.longitude)
+                position = (pos.latitude, pos.longitude)
+                segment = geodesic(prev_position, position).km
+                total_distance_km += segment
+            prev_position = pos
+        return total_distance_km
 
     @classmethod
     def run_in_progress_status(cls, run_id):
@@ -33,7 +48,6 @@ class AthleteInfo(models.Model):
 
     def __str__(self):
         return self.goals
-
 
     def get_type(self):
         return 'coach' if self.user.is_staff else 'athlete'
