@@ -8,8 +8,10 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
-from .serializers import RunSerializer, UserSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer
-from .models import Run, AthleteInfo, Challenge, Position
+from openpyxl import load_workbook
+from .serializers import (RunSerializer, UserSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer,
+                          CollectibleItemSerializer)
+from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem
 from . import utils, enum
 
 
@@ -91,6 +93,7 @@ class RunStopView(APIView):
 class AthleteInfoView(APIView):
     user = None
 
+    #вызывается перед вызовом любого другого описанного вида вызовов
     def initial(self, request, *args, **kwargs):
         super().initial(request, *args, **kwargs)
         self.user = get_object_or_404(User, id=kwargs['user_id'])
@@ -123,3 +126,41 @@ class PositionViewSet(viewsets.ModelViewSet):
     serializer_class = PositionSerializer
     filter_backends = [DjangoFilterBackend]
     search_fields = ['run']
+
+
+class CollectibleItemViewSet(viewsets.ModelViewSet):
+    queryset = CollectibleItem.objects.all()
+    serializer_class = CollectibleItemSerializer
+
+
+class UploadFileView(APIView):
+    def post(self, request):
+        excel_file = request.FILES.get('file')
+        if excel_file is None:
+            pass
+        if not excel_file.name.endswith((".xlsx", ".xls")):
+            pass
+        try:
+            workbook = load_workbook(excel_file, data_only=True)
+
+            # первая страница
+            sheet = workbook.active
+            rows = list(sheet.iter_rows(values_only=True))
+            headers = list(rows[0])
+            incorrect_headers_name = headers.index('URL')
+            headers[incorrect_headers_name] = 'picture'
+            data_rows = rows[1:]
+            result_rows = []
+            incorrect_rows = []
+            for row in data_rows:
+                row_dict = {header.lower(): value for header, value in zip(headers, row)}
+                result_rows.append(row_dict)
+            for row in result_rows:
+                serializer = CollectibleItemSerializer(data=row, partial=True)
+                if not serializer.is_valid(raise_exception=False):
+                    incorrect_rows.append([v for v in row.values()])
+                else:
+                    serializer.save()
+            return Response(incorrect_rows)
+        except Exception as e:
+            return Response(f'Загрузка документа не выполнена, ошибка: {e}', status=status.HTTP_400_BAD_REQUEST)

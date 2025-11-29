@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Run, AthleteInfo, Challenge, Position
+from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem
 from django.contrib.auth.models import User
 from . import utils
 
@@ -64,4 +64,10 @@ class PositionSerializer(serializers.ModelSerializer):
         if not Run.run_in_progress_status(value):
             raise serializers.ValidationError('Только для запущенных забегов!')
         return value
+
+
+class CollectibleItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CollectibleItem
+        fields = '__all__'
 

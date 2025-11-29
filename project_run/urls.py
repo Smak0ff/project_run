@@ -27,6 +27,7 @@ router.register('api/runs', views.RunViewSet)
 router.register('api/users', views.UserViewSet)
 router.register('api/challenges', views.ChallengeViewSet)
 router.register('api/positions', views.PositionViewSet)
+router.register('api/collectible_item', views.CollectibleItemViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -35,4 +36,5 @@ urlpatterns = [
     path('api/athlete_info/<int:user_id>/', views.AthleteInfoView.as_view()),
     path('admin/', admin.site.urls),
     path('api/company_details/', views.company_details_view),
+    path('api/upload_file/', views.UploadFileView.as_view(), name='upload_file')
 ]
