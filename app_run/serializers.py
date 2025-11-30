@@ -22,13 +22,6 @@ class UserSerializer(serializers.ModelSerializer):
         return 0 if athlete_info is None else utils.get_runs_finished_count(athlete_info.user)
 
 
-#Отдельный сериализатор под конкретный метод GET+ID
-class UserItemsSerializer(UserSerializer):
-    class Meta(UserSerializer.Meta):
-        model = User
-        fields = UserSerializer.Meta.fields + ['items']
-
-
 #Отдельный сериализатор для краткой информации по юзеру в Run
 class UserSerializerSmall(serializers.ModelSerializer):
     class Meta:
@@ -80,3 +73,11 @@ class CollectibleItemSerializer(serializers.ModelSerializer):
         model = CollectibleItem
         fields = ['name', 'uid', 'latitude', 'longitude', 'picture', 'value']
 
+
+#Отдельный сериализатор под конкретный метод GET+ID
+class UserItemsSerializer(UserSerializer):
+    items = CollectibleItemSerializer(many=True, read_only=True)
+
+    class Meta(UserSerializer.Meta):
+        model = User
+        fields = UserSerializer.Meta.fields + ['items']
