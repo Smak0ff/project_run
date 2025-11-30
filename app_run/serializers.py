@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from . import utils
 
 
+#Основной User сериализатор
 class UserSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     runs_finished = serializers.SerializerMethodField()
@@ -21,6 +22,14 @@ class UserSerializer(serializers.ModelSerializer):
         return 0 if athlete_info is None else utils.get_runs_finished_count(athlete_info.user)
 
 
+#Отдельный сериализатор под конкретный метод GET+ID
+class UserItemsSerializer(UserSerializer):
+    class Meta(UserSerializer.Meta):
+        model = User
+        fields = UserSerializer.Meta.fields + ['items']
+
+
+#Отдельный сериализатор для краткой информации по юзеру в Run
 class UserSerializerSmall(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -69,5 +78,5 @@ class PositionSerializer(serializers.ModelSerializer):
 class CollectibleItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CollectibleItem
-        fields = '__all__'
+        fields = ['name', 'uid', 'latitude', 'longitude', 'picture', 'value']
 

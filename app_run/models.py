@@ -67,6 +67,16 @@ class Position(models.Model):
     def __str__(self):
         return f'{str(self.latitude)}:{str(self.longitude)}'
 
+    def collect_items(self):
+        user_items = self.run.athlete.items.all()
+        uncollected_items = CollectibleItem.objects.exclude(id__in=user_items)
+        for item in uncollected_items:
+            user_position = (self.latitude, self.longitude)
+            item_position = (item.latitude, item.longitude)
+            distance = geodesic(user_position, item_position).km
+            if distance < 0.1:
+                item.items.add(self.run.athlete)
+
 
 class CollectibleItem(models.Model):
     name = models.CharField(max_length=300)
@@ -75,3 +85,4 @@ class CollectibleItem(models.Model):
     longitude = models.DecimalField(max_digits=7, decimal_places=4)
     picture = models.URLField()
     value = models.IntegerField()
+    items = models.ManyToManyField(User, related_name='items', blank=True)

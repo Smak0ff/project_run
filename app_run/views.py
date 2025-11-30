@@ -10,7 +10,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from openpyxl import load_workbook
 from .serializers import (RunSerializer, UserSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer,
-                          CollectibleItemSerializer)
+                          CollectibleItemSerializer, UserItemsSerializer)
 from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem
 from . import utils, enum
 
@@ -48,6 +48,12 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = ['date_joined']
     ordering = ['id']
     pagination_class = Pagination
+
+    #Если выполняется retrieve(GET+ID) вызываем другой сериализатор
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return UserItemsSerializer
+        return super().get_serializer_class()
 
     def get_queryset(self):
         qs = self.queryset
@@ -126,6 +132,13 @@ class PositionViewSet(viewsets.ModelViewSet):
     serializer_class = PositionSerializer
     filter_backends = [DjangoFilterBackend]
     search_fields = ['run']
+
+    # метод вызывается при вызове POST
+    def perform_create(self, serializer):
+        # Стандартный функционал
+        position = serializer.save()
+        # Дополнительная логика:
+        position.collect_items()
 
 
 class CollectibleItemViewSet(viewsets.ModelViewSet):
