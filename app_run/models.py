@@ -13,7 +13,7 @@ class Run(models.Model):
     athlete = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField()
     distance = models.FloatField(default=0.0)
-    run_time_seconds = models.IntegerField()
+    run_time_seconds = models.IntegerField(blank=True)
     status = models.CharField(
         choices=Status.choices,
         default=Status.INIT
