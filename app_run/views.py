@@ -141,7 +141,7 @@ class PositionViewSet(viewsets.ModelViewSet):
     queryset = Position.objects.all()
     serializer_class = PositionSerializer
     filter_backends = [DjangoFilterBackend]
-    search_fields = ['run']
+    filterset_fields = ['run']
 
     # метод вызывается при вызове POST
     def perform_create(self, serializer):
