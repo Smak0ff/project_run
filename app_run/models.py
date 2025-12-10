@@ -8,10 +8,12 @@ class Run(models.Model):
         INIT = 'init', 'init'
         IN_PROGRESS = 'in_progress', 'in_progress'
         FINISHED = 'finished', 'finished'
+    #auto_now_add=True если нужно установить время добавления в таблицу, auto_now=True - изменяет при каждом сохранении
     created_at = models.DateTimeField(auto_now_add=True)
     athlete = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField()
     distance = models.FloatField(default=0.0)
+    run_time_seconds = models.IntegerField()
     status = models.CharField(
         choices=Status.choices,
         default=Status.INIT
@@ -63,6 +65,7 @@ class Position(models.Model):
     run = models.ForeignKey(Run, on_delete=models.CASCADE)
     latitude = models.DecimalField(max_digits=7, decimal_places=4)
     longitude = models.DecimalField(max_digits=7, decimal_places=4)
+    date_time = models.DateTimeField(blank=False, null=False)
 
     def __str__(self):
         return f'{str(self.latitude)}:{str(self.longitude)}'

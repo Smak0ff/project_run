@@ -76,6 +76,7 @@ class CollectibleItemSerializer(serializers.ModelSerializer):
 
 #Отдельный сериализатор под конкретный метод GET+ID
 class UserItemsSerializer(UserSerializer):
+    #возвращаем не только PK, но и всё тело items
     items = CollectibleItemSerializer(many=True, read_only=True)
 
     class Meta(UserSerializer.Meta):

@@ -62,6 +62,9 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
             qs = qs.filter(is_staff=True)
         elif user_type == 'athlete':
             qs = qs.filter(is_staff=False)
+        #Можно оставить, можно убрать, на производительность при retrive особо не повлияет, в любом случае два запроса.
+        if self.action == "retrieve":
+            qs = qs.prefetch_related("items")
         return qs
 
 
@@ -86,6 +89,13 @@ class RunStopView(APIView):
             run.distance = run.distance_calculation()
             run.save()
             utils.challenge_check(enum.ChallengeEvent.RUN_FINISHED, run)
+            run_positions = Position.objects.filter(run=run).order_by('date_time')
+            if len(run_positions) > 1:
+                run.run_time_seconds = (
+                    int((run_positions[len(run_positions)-1].date_time - run_positions[0].date_time).total_seconds()))
+            else:
+                run.run_time_seconds = 0
+            run.save()
             return Response({'detail': f'Статус объекта {run_id} обновлен на {Run.Status.FINISHED}.',
                              'distance': run.distance})
         else:
