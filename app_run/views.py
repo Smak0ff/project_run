@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from django.conf import settings
 from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Count, Q
 from rest_framework.pagination import PageNumberPagination
 from openpyxl import load_workbook
 from .serializers import (RunSerializer, UserSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer,
@@ -65,6 +66,9 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         #Можно оставить, можно убрать, на производительность при retrive особо не повлияет, в любом случае два запроса.
         if self.action == "retrieve":
             qs = qs.prefetch_related("items")
+        qs = qs.select_related('athlete_info')
+        #используется имя связанной модели с маленькой буквы
+        qs = qs.annotate(runs_finished=Count('run', filter=Q(run__status=Run.Status.FINISHED)))
         return qs
 
 
