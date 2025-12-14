@@ -16,7 +16,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_type(self, obj):
         athlete_info = getattr(obj, 'athlete_info', None)
-        return 'coach' if athlete_info is None else athlete_info.get_type()
+        if athlete_info is None:
+            return 'coach' if obj.is_staff else 'athlete'
+        return athlete_info.get_type()
 
     # def get_runs_finished(self, obj):
     #     athlete_info = getattr(obj, 'athlete_info', None)
