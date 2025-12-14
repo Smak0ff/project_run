@@ -93,13 +93,13 @@ class RunStopView(APIView):
             run.distance = run.distance_calculation()
             run.speed = Position.objects.filter(run=run).aggregate(avg_speed=Avg('speed'))['avg_speed'] or 0
             run.save()
-            utils.challenge_check(enum.ChallengeEvent.RUN_FINISHED, run)
             run_positions = Position.objects.filter(run=run).order_by('date_time')
             if len(run_positions) > 1:
                 run.run_time_seconds = (
                     int((run_positions[len(run_positions)-1].date_time - run_positions[0].date_time).total_seconds()))
             else:
                 run.run_time_seconds = 0
+            utils.challenge_check(enum.ChallengeEvent.RUN_FINISHED, run)
             run.save()
             return Response({'detail': f'Статус объекта {run_id} обновлен на {Run.Status.FINISHED}.',
                              'distance': run.distance})

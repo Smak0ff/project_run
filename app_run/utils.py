@@ -21,17 +21,23 @@ def challenge_check(event, instance):
 
 
 def handle_run_finished(run: Run):
+    athlete = run.athlete
     #Проверка на челлендж 10 забегов
-    runs_finished = get_runs_finished_count(run.athlete)
+    runs_finished = get_runs_finished_count(athlete)
     if runs_finished >= 10:
         challenge, _ = Challenge.objects.get_or_create(
-            full_name='Сделай 10 Забегов!', athlete=run.athlete
+            full_name='Сделай 10 Забегов!', athlete=athlete
         )
     #Проверка на челлендж 50 км
-    all_distance = overall_distance(run.athlete)
+    all_distance = overall_distance(athlete)
     if all_distance >= 50:
         challenge, _ = Challenge.objects.get_or_create(
-            full_name='Пробеги 50 километров!', athlete=run.athlete
+            full_name='Пробеги 50 километров!', athlete=athlete
+        )
+    # Проверка на челлендж "2км за 10 минут"
+    if run.run_time_seconds <= 600 and run.distance >= 2:
+        challenge, _ = Challenge.objects.get_or_create(
+            full_name='2 километра за 10 минут!', athlete=athlete
         )
 
 
