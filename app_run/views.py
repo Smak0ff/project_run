@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from django.conf import settings
 from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Avg
 from rest_framework.pagination import PageNumberPagination
 from openpyxl import load_workbook
 from .serializers import (RunSerializer, UserSerializer, AthleteInfoSerializer, ChallengeSerializer, PositionSerializer,
@@ -91,6 +91,7 @@ class RunStopView(APIView):
         if run.status == Run.Status.IN_PROGRESS:
             run.status = Run.Status.FINISHED
             run.distance = run.distance_calculation()
+            run.speed = Position.objects.filter(run=run).aggregate(avg_speed=Avg('speed'))['avg_speed'] or 0
             run.save()
             utils.challenge_check(enum.ChallengeEvent.RUN_FINISHED, run)
             run_positions = Position.objects.filter(run=run).order_by('date_time')
@@ -142,7 +143,7 @@ class ChallengeViewSet(viewsets.ModelViewSet):
 
 
 class PositionViewSet(viewsets.ModelViewSet):
-    queryset = Position.objects.all()
+    queryset = Position.objects.all().select_related('run')
     serializer_class = PositionSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['run']
@@ -153,6 +154,15 @@ class PositionViewSet(viewsets.ModelViewSet):
         position = serializer.save()
         # Дополнительная логика:
         position.collect_items()
+        position.distance = position.run.distance_calculation()
+        prev_position = (
+            Position.objects
+            .filter(run=position.run, id__lt=position.id)
+            .order_by('-id')
+            .first()
+        )
+        position.speed = position.speed_calculation(prev_position)
+        position.save()
 
 
 class CollectibleItemViewSet(viewsets.ModelViewSet):

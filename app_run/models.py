@@ -8,7 +8,7 @@ class Run(models.Model):
         INIT = 'init', 'init'
         IN_PROGRESS = 'in_progress', 'in_progress'
         FINISHED = 'finished', 'finished'
-    #auto_now_add=True если нужно установить время добавления в таблицу, auto_now=True - изменяет при каждом сохранении
+    # auto_now_add=True если нужно установить время добавления в таблицу, auto_now=True - изменяет при каждом сохранении
     created_at = models.DateTimeField(auto_now_add=True)
     athlete = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField()
@@ -18,6 +18,7 @@ class Run(models.Model):
         choices=Status.choices,
         default=Status.INIT
     )
+    speed = models.FloatField(default=0.0)
 
     def __str__(self):
         return f'{self.athlete}: {self.comment}'
@@ -66,6 +67,8 @@ class Position(models.Model):
     latitude = models.DecimalField(max_digits=7, decimal_places=4)
     longitude = models.DecimalField(max_digits=7, decimal_places=4)
     date_time = models.DateTimeField(blank=False, null=False)
+    speed = models.FloatField(default=0.0)
+    distance = models.FloatField(default=0.0)
 
     def __str__(self):
         return f'{str(self.latitude)}:{str(self.longitude)}'
@@ -79,6 +82,11 @@ class Position(models.Model):
             distance = geodesic(user_position, item_position).km
             if distance < 0.1:
                 item.items.add(self.run.athlete)
+
+    def speed_calculation(self, prev_position):
+        total_time = (self.date_time - prev_position.date_time).seconds/3600
+        total_distance = self.distance - prev_position.distance
+        return 0 if total_distance == 0 else total_distance/total_time
 
 
 class CollectibleItem(models.Model):

@@ -39,6 +39,14 @@ class RunSerializer(serializers.ModelSerializer):
         model = Run
         fields = '__all__'
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if data.get('speed') is not None:
+            data['speed'] = round(float(data['speed']), 2)
+        if data.get('distance') is not None:
+            data['distance'] = round(float(data['distance']), 2)
+        return data
+
 
 class AthleteInfoSerializer(serializers.ModelSerializer):
     weight = serializers.IntegerField(min_value=1, max_value=899)
@@ -70,6 +78,14 @@ class PositionSerializer(serializers.ModelSerializer):
         if not Run.run_in_progress_status(value):
             raise serializers.ValidationError('Только для запущенных забегов!')
         return value
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if data.get('speed') is not None:
+            data['speed'] = round(float(data['speed']), 2)
+        if data.get('distance') is not None:
+            data['distance'] = round(float(data['distance']), 2)
+        return data
 
 
 class CollectibleItemSerializer(serializers.ModelSerializer):
