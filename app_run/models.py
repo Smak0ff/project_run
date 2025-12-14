@@ -84,9 +84,9 @@ class Position(models.Model):
                 item.items.add(self.run.athlete)
 
     def speed_calculation(self, prev_position):
-        total_time = (self.date_time - prev_position.date_time).seconds/3600
+        total_time = (self.date_time - prev_position.date_time).total_seconds()
         total_distance = self.distance - prev_position.distance
-        return 0 if total_distance == 0 else total_distance/total_time
+        return 0 if total_distance == 0 else total_distance*1000/total_time # м/c
 
 
 class CollectibleItem(models.Model):
