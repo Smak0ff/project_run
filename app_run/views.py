@@ -161,7 +161,8 @@ class PositionViewSet(viewsets.ModelViewSet):
             .order_by('-id')
             .first()
         )
-        position.speed = position.speed_calculation(prev_position)
+
+        position.speed = position.speed_calculation(prev_position) if prev_position is not None else 0
         position.save()
 
 
